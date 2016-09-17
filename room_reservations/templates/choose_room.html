@@ -1,0 +1,137 @@
+{% extends 'main.html' %}
+{% load staticfiles %}
+{% load bootstrap %}
+{% block title %}Tworzenie konta{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Wybierz pokój</h1>
+            <div class="col-sm-offset-4 col-sm-4">
+                <form action="{% url 'choose_room' %}" method="get" class="form" role="form">
+                    {{ search_form | bootstrap }}
+                    <input name="order" type="hidden" value="">
+                    <input name="page" type="hidden" value="1">
+                    <button type="submit" class="btn btn-default">Szukaj pokoju</button>
+                </form>
+            </div>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            Nazwa
+                            {% if order == 'name' %}
+                            <a href="?order=-name{% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}&order=-name">
+                                <span class="pull-right glyphicon glyphicon-sort-by-alphabet"></span>
+                            </a>
+                            {% elif order == '-name' %}
+                            <a href="?order={% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}">
+                                <span class="pull-right glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                            </a>
+                            {% else %}
+                            <a href="?order=name{% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}">
+                                <span class="pull-right glyphicon glyphicon-sort"></span>
+                            </a>
+                            {% endif %}
+                        </th>
+                        <th>
+                            Pojemność
+                            {% if order == 'capacity' %}
+                            <a href="?order=-capacity{% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}">
+                                <span class="pull-right glyphicon glyphicon-sort-by-alphabet"></span>
+                            </a>
+                            {% elif order == '-capacity' %}
+                            <a href="?order={% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}">
+                                <span class="pull-right glyphicon glyphicon-sort-by-alphabet-alt"></span>
+                            </a>
+                            {% else %}
+                            <a href="?order=capacity{% if search_query %}&search_query={{ search_query }}{% endif %}{% if min_capacity %}&min_capacity={{ min_capacity }}{% endif %}{% if max_capacity %}&max_capacity={{ max_capacity }}{% endif %}{% for attribute in attributes %}&attributes={{ attribute }}{% endfor %}">
+                                <span class="pull-right glyphicon glyphicon-sort"></span>
+                            </a>
+                            {% endif %}
+                        </th>
+                        <th>Opis</th>
+                        <th>Zarezerwuj</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in rooms %}
+                    <tr url="{% url 'choose_term' room.id %}">
+                        <td>{{ room.name }}</td>
+                        <td>{{ room.capacity }}</td>
+                        <td>{{ room.description }}</td>
+                        <td>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#select-term" onclick="chooseRoom({{ room.id }})">
+                                Zarezerwuj
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if rooms.has_previous or rooms.has_next %}
+            <div class="pager">
+                {% if rooms.has_previous %}
+                <a href="?page={{ rooms.previous_page_number }}&order={{ order }}&search={{ search }}">Poprzednia strona</a>
+                {% endif %}
+                Strona {{ rooms.number }} z {{ rooms.paginator.num_pages }}.
+                {% if rooms.has_next %}
+                <a href="?page={{ rooms.next_page_number }}&order={{ order }}&search={{ search }}">Następna strona.</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="modal fade" id="select-term" tabindex="-1" role="dialog" aria-labelledby="select-term-label" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="select-term-label">Wybierz termin</h4>
+                  </div>
+                  <div class="modal-body">
+                    ...
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    this.chooseRoom = function(roomId) {
+        console.log(roomId)
+        var modalBody = $('.modal-body')
+        var loadingImage = $('<img src="{% static 'loading.gif' %}" alt="Ładowanie, proszę czekać." width="100%">')
+        modalBody.empty()
+        modalBody.append(loadingImage)
+        $.getJSON('/get_free_terms/room/' + roomId + '/', function(data) {
+            console.log(data)
+            modalBody.empty()
+            var panelGroup = $('<div class="panel-group" id="accordion">')
+            data.forEach(function(e, i) {
+                var panel = $('<div class="panel panel-default">')
+
+                var panelTitle = e.display_date + ' (godz. ' + e.free_terms[0].from_hour + '-' + e.free_terms[0].to_hour
+                e.free_terms.shift()
+                e.free_terms.forEach(function(e) { panelTitle = panelTitle + ' i ' + e.from_hour + '-' + e.to_hour })
+                panelTitle = panelTitle + ')'
+
+                var panelHeading = $('<div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse' + i + '">' + panelTitle + '</a></h4></div>')
+                var panelBody = $('<div id="collapse' + i + '" class="panel-collapse collapse"><div class="panel-body">Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably havent heard of them accusamus labore sustainable VHS.</div></div>')
+                panel.append(panelHeading)
+                panel.append(panelBody)
+                panelGroup.append(panel)
+            })
+            modalBody.append(panelGroup)
+        })
+    }
+});
+</script>
+{% endblock %}

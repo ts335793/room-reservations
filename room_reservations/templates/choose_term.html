@@ -1,0 +1,44 @@
+{% extends 'main.html' %}
+{% load bootstrap %}
+{% block title %}Tworzenie konta{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Wybierz termin</h1>
+            <div class="col-sm-offset-4 col-sm-4">
+                <form action="{% url 'choose_term' room_id %}" method="post" class="form" role="form">
+                    {% csrf_token %}
+                    {{ form | bootstrap }}
+                    <button type="submit" class="btn btn-default">Wybierz termin</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Wolne terminy</h1>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Od godziny</th>
+                        <th>Do godziny</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for free_term in free_terms %}
+                    <tr>
+                        <td>{{ free_term.date }}</td>
+                        <td>{{ free_term.from_hour }}</td>
+                        <td>{{ free_term.to_hour }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% endblock %}

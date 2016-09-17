@@ -1,0 +1,9 @@
+Django==1.6.2
+argparse==1.2.1
+django-bootstrap-form==3.1
+django-crispy-forms==1.4.0
+django-debug-toolbar==1.0.1
+django-pagination==1.0.7
+psycopg2==2.5.2
+sqlparse==0.1.11
+wsgiref==0.1.2

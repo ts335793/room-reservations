@@ -1,0 +1,36 @@
+{% extends 'main.html' %}
+{% load bootstrap %}
+{% block title %}Potwierdzenie danych{% endblock %}
+{% block content %}
+<div class="container">
+    {% if messages %}
+    <div class="row">
+        <div class="col-sm-12">
+            <ul class="list-group">
+                {% for message in messages %}
+                    {% if message.tags %}
+                        <li class="list-group-item list-group-item-{{ message.tags }}">{{ message }}</li>
+                    {% else %}
+                        <li class="list-group-item list-group-item-default">{{ message }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Zatwierdź zamówienie</h1>
+            <div class="col-sm-offset-4 col-sm-4">
+                <form action="" method="post" class="form" role="form">
+                    {% csrf_token %}
+                    {{ form | bootstrap }}
+                    <button type="submit" class="btn btn-default" {% if not form.is_valid %}disabled{% endif %}>Zatwierdź zamówienie</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% endblock %}

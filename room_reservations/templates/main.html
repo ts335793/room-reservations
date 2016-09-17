@@ -1,0 +1,76 @@
+{% load staticfiles %}
+<!doctype html>
+<html>
+    <head>
+        <title>{% block title %}Rezerwacje pokoi{% endblock %}</title>
+        <link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
+        <link href="{% static 'custom.css' %}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'main' %}">Rezerwacje pokoi</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="{%  url 'choose_room' %}">Złóż rezerwację</a></li>
+                    </ul>
+                    {% if user.is_authenticated %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#">Jesteś zalogowany jako {{ user }}</a></li>
+                        <li><a href="{% url 'log_out' %}">Wyloguj</a></li>
+                    </ul>
+                    {% else %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="{% url 'log_in' %}">Zaloguj</a>
+                        <li><a href="{% url 'create_account' %}">Stwórz konto</a></li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% block content %}
+        <div class="container">
+            {% if messages %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="list-group">
+                        {% for message in messages %}
+                            {% if message.tags %}
+                                <li class="list-group-item list-group-item-{{ message.tags }}">{{ message }}</li>
+                            {% else %}
+                                <li class="list-group-item list-group-item-default">{{ message }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="jumbotron">
+                        <h1>System rezerwacji pokoi</h1>
+                        {% if user.is_authenticated %}
+                            <p>W celu zarezerwowania pokoju, kliknij zarezerwuj pokój.</p>
+                        {% else %}
+                            <p>W celu zarezerwowania pokoju, zaloguj się.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+        <script src="{% static 'jquery.js' %}"></script>
+        <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>
